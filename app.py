@@ -1,6 +1,7 @@
 import streamlit as st
 
 # --- Page Configuration ---
+# This command should be run only once, in your main app file.
 st.set_page_config(
     page_title="Kerala Farming Assistant",
     page_icon="🌿",
@@ -8,7 +9,8 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# --- Custom CSS ---
+# --- Custom CSS for Styling ---
+# This CSS will apply to all pages in your app.
 st.markdown("""
 <style>
     .title {
@@ -18,28 +20,18 @@ st.markdown("""
         text-align: center;
         padding: 20px;
     }
-    .st-emotion-cache-16txtl3 {
-        background-color: #E8F5E9;
-    }
+    /* You can add more global styles here */
 </style>
 """, unsafe_allow_html=True)
 
-# --- Sidebar Navigation ---
-with st.sidebar:
-    st.header("Navigation")
-    page = st.radio("Choose a feature", ["Crop Disease Analyzer", "Farming Advisor Chatbot", "Price Prediction"])
-
+# --- Main Page Content ---
 st.markdown('<p class="title">🌿 Kerala AI Farming Assistant 🌿</p>', unsafe_allow_html=True)
 
-# --- Import Pages ---
-if page == "Crop Disease Analyzer":
-    import disease_analyzer
-    disease_analyzer.show_page()
+st.header("Welcome to your AI-Powered Farming Co-Pilot")
+st.write("""
+Navigate through the features using the sidebar on the left.
+- **Crop Disease Analyzer:** Upload a photo of a crop leaf to identify diseases instantly.
+- **Farming Advisor Chatbot:** Get answers to your farming questions.
+- **Price Prediction:** View market trends and future price predictions for your crops.
+""")
 
-elif page == "Farming Advisor Chatbot":
-    import advisor_chatbot
-    advisor_chatbot.show_page()
-
-elif page == "Price Prediction":
-    import price_prediction
-    price_prediction.show_page()
