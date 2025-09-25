@@ -26,6 +26,16 @@ def analyze_image_with_model(uploaded_image, processor, model):
     if not all([processor, model]):
         return {"error": "Model could not be loaded."}
 
+<<<<<<< HEAD
+=======
+# --- MOCK API FUNCTION (Replace with your actual Gemini API or trained model) ---
+def analyze_image_with_gemini(uploaded_image):
+    """
+    This is a MOCK function.
+    In your real app, this function will take the image,
+    send it to the Gemini Vision API, and return the response.
+    """
+>>>>>>> e8103016f85675647f9fdc40ca47d6f1db711691
     with st.spinner('Analyzing the crop leaf... Please wait.'):
         # Ensure image is in RGB format
         image = uploaded_image.convert("RGB")
@@ -33,6 +43,7 @@ def analyze_image_with_model(uploaded_image, processor, model):
         # Preprocess the image for the model
         inputs = processor(images=image, return_tensors="pt")
 
+<<<<<<< HEAD
         # Make a prediction
         with torch.no_grad():
             outputs = model(**inputs)
@@ -97,3 +108,28 @@ def show_page():
 
 if __name__ == "__main__":
     show_page()
+=======
+# --- PAGE LAYOUT ---
+st.header("📸 Crop Disease Analyzer")
+st.write("Upload a crop leaf photo, and AI will identify diseases.")
+
+uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+
+if uploaded_file is not None:
+    image = Image.open(uploaded_file)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.image(image, caption="Uploaded Leaf Image", use_column_width=True)
+
+    analysis_result = analyze_image_with_gemini(image)
+
+    with col2:
+        st.subheader("Analysis Result")
+        st.success(f"**Disease Name:** {analysis_result['disease_name']}")
+        st.warning(f"**Confidence:** {analysis_result['confidence']}")
+        st.info(f"**Description:** {analysis_result['description']}")
+        st.error(f"**Immediate Advice:** {analysis_result['first_step_advice']}")
+        st.write("---")
+        st.info(f"**Next Step:** {analysis_result['detailed_plan']}")
+>>>>>>> e8103016f85675647f9fdc40ca47d6f1db711691
