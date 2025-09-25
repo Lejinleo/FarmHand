@@ -83,7 +83,7 @@ def get_gemini_chat_response(prompt, chat_history):
 # Sidebar for navigation
 with st.sidebar:
     st.header("Navigation")
-    page = st.radio("Choose a feature", ["Crop Disease Analyzer", "Farming Advisor Chatbot"])
+    page = st.radio("Choose a feature", ["Crop Disease Analyzer", "Farming Advisor Chatbot", "Price Prediction"])
 
 # Main title
 st.markdown('<p class="title">🌿 Kerala AI Farming Assistant 🌿</p>', unsafe_allow_html=True)
