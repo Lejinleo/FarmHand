@@ -20,9 +20,14 @@ selected_market = st.selectbox("Select Market", ["-- Select Market --"] + market
 if selected_crop in crops and selected_market in markets:
     st.subheader(f"📈 Price Analysis for {selected_crop} in {selected_market}")
 
+    # --- FIX: Ensure the seed is a positive 32-bit integer ---
+    # The hash() function can return negative numbers, which causes a ValueError.
+    # Using the modulo operator ensures the seed is always in the valid range.
+    seed_value = (hash(selected_crop) + hash(selected_market)) % (2**32)
+    np.random.seed(seed_value)
+
     # --- Mock Current Price ---
     # In a real app, this data would come from an API or a database
-    np.random.seed(hash(selected_crop) + hash(selected_market))
     current_price = np.random.randint(2500, 5000)  # random current price in ₹/quintal
 
     # --- Mock Historical Prices ---
