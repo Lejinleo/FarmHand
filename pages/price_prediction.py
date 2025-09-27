@@ -3,60 +3,31 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-import requests # We need this library again
 
-# --- Data Fetching Function with Caching ---
+# --- Data Fetching Function (MODIFIED to use Sample Data) ---
 @st.cache_data
 def get_price_data(crop, market):
     """
-    Fetches real-time price data from the data.gov.in API.
+    Generates a consistent set of sample historical price data for demonstration.
+    The API call has been removed to ensure the app works offline.
     """
-    try:
-        # 1. Load your API key securely from the secrets file.
-        api_key = st.secrets["API_KEY"]
+    # Use a seed based on crop and market to make the random data consistent for the same selection
+    seed_value = (hash(crop) + hash(market)) % (2**32)
+    np.random.seed(seed_value)
 
-        # 2. Define the resource ID as a string variable first (THE FIX)
-        resource_id = "9ef84268-d588-465a-a308-a864a43d0070"
-        # Then, use that variable in the f-string
-        base_url = f"https://api.data.gov.in/resource/{resource_id}"
+    # Generate 30 days of historical data ending today
+    today = pd.Timestamp.today()
+    dates = pd.date_range(end=today, periods=30, freq='D')
+    
+    # Create prices that fluctuate around a random base value, making it look realistic
+    base_price = np.random.randint(2000, 5000)
+    # cumsum() creates a "random walk" effect, so prices don't jump wildly day-to-day
+    price_fluctuations = np.random.randint(-150, 155, size=30).cumsum()
+    prices = base_price + price_fluctuations
 
-        # 3. Construct the full URL with parameters, now including the state filter
-        params = {
-            "api-key": api_key, # FIX: Using the correct variable name 'api_key'
-            "format": "json",
-            "filters[state.keyword]": "Kerala",
-            "filters[market]": market,
-            "filters[commodity]": crop,
-            "limit": 100 # Get the latest 100 records
-        }
-        
-        response = requests.get(base_url, params=params)
-        response.raise_for_status()
-        data = response.json()
-
-        # 4. Parse the data (this structure is common for data.gov.in)
-        # FIX: Using 'records' (plural) which is the standard for this API
-        records = data.get('records', [])
-        if not records:
-            st.warning("No data found for the selected crop and market in Kerala.")
-            return None
-            
-        df = pd.DataFrame(records)
-        # IMPORTANT: Check the actual API response to confirm these column names are correct.
-        df = df.rename(columns={"arrival_date": "date", "modal_price": "price"})
-        df['date'] = pd.to_datetime(df['date'])
-        
-        df['price'] = pd.to_numeric(df['price'], errors='coerce')
-        df.dropna(subset=['price'], inplace=True)
-        
-        return df.sort_values(by='date')
-
-    except requests.exceptions.RequestException as e:
-        st.error(f"Error fetching data from API: {e}")
-        return None
-    except KeyError:
-        st.error("Could not find the API Key. Please make sure it's set correctly in .streamlit/secrets.toml")
-        return None
+    # Create and return a Pandas DataFrame in the same format the API would have
+    df = pd.DataFrame({'date': dates, 'price': prices})
+    return df
 
 # --- PAGE LAYOUT ---
 st.header("📊 Crop Price Prediction")
@@ -71,16 +42,15 @@ selected_market = st.selectbox("Select Market", markets)
 if selected_crop and selected_market:
     st.subheader(f"📈 Price Analysis for {selected_crop} in {selected_market}")
 
-    # FIX: We now exclusively use the data from the API call.
+    # We now call our new function that generates sample data
     price_data = get_price_data(selected_crop, selected_market)
 
-    # All mock data generation has been removed.
     if price_data is not None and not price_data.empty:
         days = price_data['date']
         historical_prices = price_data['price']
         current_price = historical_prices.iloc[-1]
         
-        # We still use numpy for the PREDICTED part, based on the last real price
+        # The prediction logic remains the same, using the last historical price as a starting point
         future_days = pd.date_range(start=days.iloc[-1] + pd.Timedelta(days=1), periods=7)
         predicted_prices = np.linspace(current_price, current_price + np.random.randint(-200, 300), 7)
 
@@ -107,5 +77,3 @@ if selected_crop and selected_market:
         """)
 else:
     st.warning("👆 Please select both a crop and a market to see the price prediction.")
-
-
