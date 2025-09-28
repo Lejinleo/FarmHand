@@ -1,3 +1,5 @@
+# price_comparison.py
+
 import streamlit as st
 import pandas as pd
 import requests
@@ -18,14 +20,14 @@ def get_price_data(crop, market):
             "filters[state.keyword]": "Kerala",
             "filters[market]": market,
             "filters[commodity]": crop,
-            "limit": 1 # We only need the single most recent price
+            "limit": 1 # Only most recent price
         }
         response = requests.get(base_url, params=params)
         response.raise_for_status()
         data = response.json()
         records = data.get('records', [])
         if not records:
-            return None # Return None if no data
+            return None
         return records[0]
     except (requests.exceptions.RequestException, KeyError):
         return None
@@ -40,36 +42,37 @@ def get_all_market_prices(crop, markets_list):
                 "Market": record.get('market'),
                 "Price": pd.to_numeric(record.get('modal_price'), errors='coerce')
             })
-    
+
     if not price_data:
         return None
-        
+
     df = pd.DataFrame(price_data)
     df.dropna(inplace=True)
     return df.set_index('Market')
 
-# --- PAGE LAYOUT ---
-st.header("📊 Daily Market Price Comparison")
-st.write("Select a crop to see today's prices across major markets in Kerala.")
+# --- SHOW PAGE FUNCTION ---
+def show_page():
+    st.header("📊 Daily Market Price Comparison")
+    st.write("Select a crop to see today's prices across major markets in Kerala.")
 
-crops = ["Rice", "Coconut", "Banana", "Black Pepper", "Ginger", "Rubber"]
-markets = ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur", "Palakkad"]
+    crops = ["Rice", "Coconut", "Banana", "Black Pepper", "Ginger", "Rubber"]
+    markets = ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur", "Palakkad"]
 
-selected_crop = st.selectbox("Select Crop", crops)
+    selected_crop = st.selectbox("Select Crop", crops)
 
-if selected_crop:
-    st.subheader(f"📍 Today's Prices for {selected_crop} in Kerala")
+    if selected_crop:
+        st.subheader(f"📍 Today's Prices for {selected_crop} in Kerala")
 
-    market_prices_df = get_all_market_prices(selected_crop, markets)
+        market_prices_df = get_all_market_prices(selected_crop, markets)
 
-    if market_prices_df is not None and not market_prices_df.empty:
-        st.bar_chart(market_prices_df, height=400)
+        if market_prices_df is not None and not market_prices_df.empty:
+            st.bar_chart(market_prices_df, height=400)
 
-        st.markdown("### 🏷️ Price Summary (per quintal)")
-        st.dataframe(market_prices_df.sort_values(by="Price", ascending=False))
+            st.markdown("### 🏷️ Price Summary (per quintal)")
+            st.dataframe(market_prices_df.sort_values(by="Price", ascending=False))
 
-        best_market = market_prices_df['Price'].idxmax()
-        best_price = market_prices_df['Price'].max()
-        st.success(f"**Best Market:** You can get the highest price for {selected_crop} today in **{best_market}** at **₹{best_price:,.2f}** per quintal.")
-    else:
-        st.warning(f"Could not retrieve price data for {selected_crop} today. Please try again later.")
+            best_market = market_prices_df['Price'].idxmax()
+            best_price = market_prices_df['Price'].max()
+            st.success(f"**Best Market:** You can get the highest price for {selected_crop} today in **{best_market}** at **₹{best_price:,.2f}** per quintal.")
+        else:
+            st.warning(f"Could not retrieve price data for {selected_crop} today. Please try again later.")

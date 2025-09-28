@@ -11,7 +11,7 @@ def run_app():
             logout()
         st.markdown("---")
         st.header("Navigation")
-        page = st.radio("Choose a feature", ["Crop Disease Analyzer", "Farming Advisor Chatbot", "Price Prediction"])
+        page = st.radio("Choose a feature", ["Crop Disease Analyzer", "Farming Advisor Chatbot", "Price Prediction","Market Price Comparison"])
 
     # --- Main Title ---
     st.markdown('<h1 style="text-align:center;color:#2E7D32;">🌿 Kerala AI Farming Assistant 🌿</h1>', unsafe_allow_html=True)
@@ -20,17 +20,17 @@ def run_app():
     if page == "Crop Disease Analyzer":
         import disease_analyzer
         disease_analyzer.show_page()
-
     elif page == "Farming Advisor Chatbot":
-        import advisor_chatbot
-        advisor_chatbot.show_page()
-
+        import mistral_chatbot
+        mistral_chatbot.show_page()
+    elif page == "Market Price Comparison":
+        import marketbest
+        marketbest.show_page()
+       
     elif page == "Price Prediction":
         import price_prediction
         price_prediction.show_page()
-    elif page == "Market Best Prices":
-        import marketbest
-        marketbest.show_page()
+
 
 # --- Logout Function ---
 def logout():
